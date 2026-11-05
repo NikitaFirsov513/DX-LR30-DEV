@@ -23,6 +23,15 @@ try {
     if ($Preview) { Show-Pj26ConsolePreview; exit 0 }
     $settings = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'flash-settings.json') -Raw | ConvertFrom-Json
     if (-not ('Pj26Flash.SerialDiscovery' -as [type])) { Add-Type -Path (Join-Path $PSScriptRoot 'Stm32Serial.cs') }
+    if ($DryRun) {
+        if ($ProbeOnly -or $ListPorts) { throw 'DryRun validates a HEX file; do not combine it with ProbeOnly or ListPorts.' }
+        if (-not $Firmware) { throw 'Specify the built HEX with -Firmware.' }
+        $hexFile = (Resolve-Path -LiteralPath $Firmware).Path
+        $image = [Pj26Flash.Image]::Load($hexFile)
+        Write-Pj26Metadata -File $hexFile -Bytes $image.Length
+        Stop-Pj26Console -DryRun
+        exit 0
+    }
     . (Join-Path $PSScriptRoot 'serial-ports.ps1')
     $devices = @([Pj26Flash.SerialDiscovery]::Devices())
     Write-Pj26Log 'ports' (($devices | Select-Object Port,Name,HardwareId | ConvertTo-Json -Compress) -join '')
@@ -52,7 +61,6 @@ try {
     }
     $device = @($devices | Where-Object { $_.Port -eq $Port })[0]
     Write-Pj26Metadata -File $hexFile -Bytes $bytes -Port $Port -Device $device.Name -Baud $Baud
-    if ($DryRun) { Stop-Pj26Console -DryRun; exit 0 }
     $bootRts = [bool]$settings.bootRts
     if ($InvertBoot) { $bootRts = -not $bootRts }
     $report = [Action[string,string]] { param($kind, $text) Write-Pj26Event -Kind $kind -Text $text }

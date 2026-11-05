@@ -4,37 +4,33 @@ type: ARM
 deviceName: STM32F103C8
 packDir: null
 srcDirs:
-  - Core
-  - Driver
-  - Main
-  - LR_driver
-  - quequ
-  - SDK/STM32F1xx_HAL_Driver/Src
+  - app
+  - board
+  - mcu
+  - devices
+  - vendor
 virtualFolder:
   name: <virtual_root>
   files: []
   folders: []
 dependenceList: []
-outDir: build
+outDir: build\eide
 miscInfo:
-  uid: 658791932b9ff2f79d93f8a345d93c5e
+  uid: f12d63965771dc8c1d65e0e1c0a8cd68
 targets:
   Radio:
     cppPreprocessAttrs:
       defineList:
-        - USE_HAL_DRIVER
         - STM32F103xB
         - HSE_VALUE=8000000
       incList:
-        - Core
-        - Driver
-        - Main
-        - LR_driver
-        - LR_driver/src
-        - quequ
-        - SDK/CMSIS/Include
-        - SDK/CMSIS/Device/ST/STM32F1xx/Include
-        - SDK/STM32F1xx_HAL_Driver/Inc
+        - app
+        - board
+        - mcu
+        - devices/sx126x
+        - vendor/semtech
+        - vendor/cmsis/Include
+        - vendor/cmsis/Device/ST/STM32F1xx/Include
       libList: []
     excludeList: []
     settings: {}
@@ -52,7 +48,7 @@ targets:
           beforeBuildTasks: []
           c/cpp-compiler:
             CXX_FLAGS: ""
-            C_FLAGS: -Wno-unused-parameter
+            C_FLAGS: -Wextra -Werror -fno-common -Wno-unused-parameter
             language-c: c11
             language-cpp: c++11
             one-elf-section-per-data: true
@@ -79,26 +75,23 @@ targets:
     uploadConfigMap:
       Custom:
         bin: ""
-        commandLine: powershell.exe -NoProfile -ExecutionPolicy Bypass -File "tools/flash.ps1" -Firmware "${programFile}" -Port "${port}"
+        commandLine: powershell.exe -NoProfile -ExecutionPolicy Bypass -File "tools/flash.ps1" -Firmware "${programFile}"
         eraseChipCommand: ""
     uploader: Custom
   UART:
     cppPreprocessAttrs:
       defineList:
-        - USE_HAL_DRIVER
         - STM32F103xB
         - HSE_VALUE=8000000
         - UART_ONLY=1
       incList:
-        - Core
-        - Driver
-        - Main
-        - LR_driver
-        - LR_driver/src
-        - quequ
-        - SDK/CMSIS/Include
-        - SDK/CMSIS/Device/ST/STM32F1xx/Include
-        - SDK/STM32F1xx_HAL_Driver/Inc
+        - app
+        - board
+        - mcu
+        - devices/sx126x
+        - vendor/semtech
+        - vendor/cmsis/Include
+        - vendor/cmsis/Device/ST/STM32F1xx/Include
       libList: []
     excludeList: []
     settings: {}
@@ -116,7 +109,7 @@ targets:
           beforeBuildTasks: []
           c/cpp-compiler:
             CXX_FLAGS: ""
-            C_FLAGS: -Wno-unused-parameter
+            C_FLAGS: -Wextra -Werror -fno-common -Wno-unused-parameter
             language-c: c11
             language-cpp: c++11
             one-elf-section-per-data: true
@@ -143,6 +136,6 @@ targets:
     uploadConfigMap:
       Custom:
         bin: ""
-        commandLine: powershell.exe -NoProfile -ExecutionPolicy Bypass -File "tools/flash.ps1" -Firmware "${programFile}" -Port "${port}"
+        commandLine: powershell.exe -NoProfile -ExecutionPolicy Bypass -File "tools/flash.ps1" -Firmware "${programFile}"
         eraseChipCommand: ""
     uploader: Custom

@@ -1,0 +1,30 @@
+{
+  "url": "https://www.keil.com/pack/Keil.STM32F1xx_DFP.2.4.1.pack",
+  "pack_sha256": "807ea15da5b172b916bbc47b2b87f1e621240ad208d38e82a417a2ef8191e9d1",
+  "files": [
+    {
+      "file": "docs/st/RM0008.pdf",
+      "pack_member": "Documents/CD00171190.pdf",
+      "bytes": 13099796,
+      "sha256": "301abd2ecb1acf91d8be448939d3e89dfce04b0907908a9b06e1160159c5ef38"
+    },
+    {
+      "file": "docs/st/DS5319-STM32F103x8-xB.pdf",
+      "pack_member": "Documents/CD00161566.pdf",
+      "bytes": 2006428,
+      "sha256": "4741c03c5793745c1709ab48237ea23d204c4fc2ca735ceafa03367f32960917"
+    },
+    {
+      "file": "docs/arm/Cortex-M3-Generic-User-Guide.pdf",
+      "pack_member": "Documents/dui0552a_cortex_m3_dgug.pdf",
+      "bytes": 1364135,
+      "sha256": "ced76c9595765af20cbe66f76eaa4c653cdd8cd935c46c8032366348d0dd90a5"
+    },
+    {
+      "file": "debug/STM32F103xx.svd",
+      "pack_member": "SVD/STM32F103xx.svd",
+      "bytes": 867312,
+      "sha256": "1d92b65aaf397a18a599fb6a840812015ad379cdcc0cc3687f673f63e7445367"
+    }
+  ]
+}

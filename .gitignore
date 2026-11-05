@@ -1,5 +1,34 @@
-build/
-.eide/log/
-.eide/*.lock
-.vscode/.browse.c_cpp.db*
+/build/
 __pycache__/
+*.pyc
+
+# Machine-specific configuration. Keep the matching *.example.json templates.
+/.vscode/settings.json
+/tools/local-settings.json
+/CMakeUserPresets.json
+/*.local.code-workspace
+
+# Downloaded reference material stays on this workstation.
+/docs/**/*.pdf
+/docs/cmsis/
+/docs/local-manifest.json
+
+# Local recovery images and source archives; keep reference/BASELINE.md.
+/reference/*.hex
+/reference/*.bin
+/reference/*.zip
+
+# Compiler output and temporary archives outside the usual build directory.
+*.o
+*.obj
+*.elf
+*.axf
+*.map
+*.hex
+*.bin
+*.zip
+*.7z
+*.pack
+
+/.eide/*.before-*
+/tools/*.before-*

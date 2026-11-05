@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Radio: SWD / ST-LINK (optional)",
+      "type": "cortex-debug",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/Radio/dx_lr30_pj26.elf",
+      "servertype": "openocd",
+      "serverpath": "${config:pj26.openocd}",
+      "armToolchainPath": "${config:pj26.armGccDir}",
+      "configFiles": [
+        "interface/stlink.cfg",
+        "target/stm32f1x.cfg"
+      ],
+      "svdFile": "${workspaceFolder}/debug/STM32F103xx.svd",
+      "runToEntryPoint": "main",
+      "preLaunchTask": "Build Radio"
+    }
+  ]
+}

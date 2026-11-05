@@ -1,0 +1,174 @@
+[
+  {
+    "file": "arm/Cortex-M3-Generic-User-Guide.pdf",
+    "pages": 180,
+    "cover_revision": [],
+    "bytes": 1364135,
+    "sha256": "ced76c9595765af20cbe66f76eaa4c653cdd8cd935c46c8032366348d0dd90a5"
+  },
+  {
+    "file": "dx-smart/DS_SX1261-2_V2_1.pdf",
+    "pages": 114,
+    "cover_revision": [
+      "Rev. 2"
+    ],
+    "bytes": 4130184,
+    "sha256": "3a82d71d6096a1a6a489a956dc5f9899c305567ae5f62d9c6fb8012f4003b73f"
+  },
+  {
+    "file": "dx-smart/DX-LR30-900M22S Module technical manual.pdf",
+    "pages": 23,
+    "cover_revision": [],
+    "bytes": 2029029,
+    "sha256": "0ee28f83baa57dacf8fe6edd1a7e8216c666e24835b1394835938d9c6b40f070"
+  },
+  {
+    "file": "dx-smart/DX-LR30-900M22SP Development board user_s manual.pdf",
+    "pages": 14,
+    "cover_revision": [],
+    "bytes": 1581091,
+    "sha256": "4894b295220b853f8c169a41227d1d9cdb2efd30b77a00a1777d7ffc09deebd2"
+  },
+  {
+    "file": "dx-smart/LR30-SP PCBA schematic diagram.pdf",
+    "pages": 1,
+    "cover_revision": [],
+    "bytes": 441638,
+    "sha256": "b5936a948a4a456099815b5e28e50d29e07e685949860294d1d8067f11759d2d"
+  },
+  {
+    "file": "dx-smart/STM32F103C8T6.pdf",
+    "pages": 67,
+    "cover_revision": [
+      "Rev 2"
+    ],
+    "bytes": 967404,
+    "sha256": "a464daeab92655618adc70458b5f736e43f4eb17db731ebce17c1a7b6f3e3baf"
+  },
+  {
+    "file": "st/AN2548.pdf",
+    "pages": 17,
+    "cover_revision": [
+      "Rev 8"
+    ],
+    "bytes": 270471,
+    "sha256": "809624b6305adb1cbbbc258fa7fb5e0fe7c992d5ae9cfcefefc59f0dfd5aefd5"
+  },
+  {
+    "file": "st/AN2586.pdf",
+    "pages": 28,
+    "cover_revision": [
+      "Rev 7"
+    ],
+    "bytes": 426285,
+    "sha256": "fbd855e1701f6cd0dce0caaa3821a35d782e18d7dc4977b2bff130bc4a916ad7"
+  },
+  {
+    "file": "st/AN2606.pdf",
+    "pages": 517,
+    "cover_revision": [
+      "Rev 69"
+    ],
+    "bytes": 7062576,
+    "sha256": "b0ed4c4839c411311426ff5b6219595d269d79fa7cbc590a8bf77c91f098912c"
+  },
+  {
+    "file": "st/AN3155.pdf",
+    "pages": 52,
+    "cover_revision": [
+      "Rev 21"
+    ],
+    "bytes": 1064264,
+    "sha256": "0202b41d62e359f744ec8b183c851417a31590c85253c27f818bc141c5d03611"
+  },
+  {
+    "file": "st/DS5319-STM32F103x8-xB.pdf",
+    "pages": 117,
+    "cover_revision": [
+      "Rev 17"
+    ],
+    "bytes": 2006428,
+    "sha256": "4741c03c5793745c1709ab48237ea23d204c4fc2ca735ceafa03367f32960917"
+  },
+  {
+    "file": "st/ES096.pdf",
+    "pages": 41,
+    "cover_revision": [
+      "Rev 14"
+    ],
+    "bytes": 636081,
+    "sha256": "151ba211e98054f83c4f2d6393c6361c1cee93e869512e0c520adca04a43d4f8"
+  },
+  {
+    "file": "st/PM0056.pdf",
+    "pages": 156,
+    "cover_revision": [
+      "Rev 6"
+    ],
+    "bytes": 2098835,
+    "sha256": "773eaa32930fcd54fb987316cb8edc2f0716c7957f36bb62e721b0fa0be29671"
+  },
+  {
+    "file": "st/PM0075.pdf",
+    "pages": 31,
+    "cover_revision": [
+      "Rev 2"
+    ],
+    "bytes": 302167,
+    "sha256": "01d15d20fba016790bb2aad0179188b83c430b9a8327be4ce5f036580c7af646"
+  },
+  {
+    "file": "st/RM0008.pdf",
+    "pages": 1133,
+    "cover_revision": [
+      "Rev 17"
+    ],
+    "bytes": 13099796,
+    "sha256": "301abd2ecb1acf91d8be448939d3e89dfce04b0907908a9b06e1160159c5ef38"
+  },
+  {
+    "file": "st/STM32CubeF1GettingStarted.pdf",
+    "pages": 26,
+    "cover_revision": [
+      "Rev 3"
+    ],
+    "bytes": 542868,
+    "sha256": "e611d0dd7966573e0edea6b9e2db4b67186f85e98e765d07e41893504bf8e0e8"
+  },
+  {
+    "file": "st/UM1075-STLINK.pdf",
+    "pages": 19,
+    "cover_revision": [
+      "Rev 8"
+    ],
+    "bytes": 691897,
+    "sha256": "f8a06f2401aad35581a4fa500b558ceba49b6c0aea399b31608d01a9e4b69eeb"
+  },
+  {
+    "file": "st/UM1718-CubeMX.pdf",
+    "pages": 582,
+    "cover_revision": [
+      "Rev 49"
+    ],
+    "bytes": 69174442,
+    "sha256": "1a23843ba630516caf78f52e70188abcddda25fcecac653855e3b464c5670035"
+  },
+  {
+    "file": "st/UM1850.pdf",
+    "pages": 1166,
+    "cover_revision": [
+      "Rev 2"
+    ],
+    "bytes": 26213552,
+    "sha256": "7d67100727cb3921402338d715e52e8f0704f26e99df7fa03c03d6979b32aa94"
+  },
+  {
+    "file": "st/UM2237.pdf",
+    "pages": 186,
+    "cover_revision": [
+      "Rev 30"
+    ],
+    "bytes": 15726955,
+    "sha256": "79d3d1055760155e76243ffa4da175a666031608e5f75eb77807343966aaf39e"
+  }
+]

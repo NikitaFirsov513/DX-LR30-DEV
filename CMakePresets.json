@@ -1,0 +1,22 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "radio",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/Radio",
+      "toolchainFile": "${sourceDir}/cmake/arm-none-eabi.cmake",
+      "cacheVariables": {"PJ26_TARGET": "Radio"}
+    },
+    {
+      "name": "uart",
+      "inherits": "radio",
+      "binaryDir": "${sourceDir}/build/UART",
+      "cacheVariables": {"PJ26_TARGET": "UART"}
+    }
+  ],
+  "buildPresets": [
+    {"name": "radio", "configurePreset": "radio"},
+    {"name": "uart", "configurePreset": "uart"}
+  ]
+}

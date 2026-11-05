@@ -1,0 +1,111 @@
+{
+  "checked_at": "2026-11-05T17:24:12.019306+00:00",
+  "documents": [
+    {
+      "file": "st/RM0008.pdf",
+      "title": "STM32F1 reference manual: RCC, GPIO, AFIO, SPI, USART, timers, EXTI",
+      "url": "https://www.st.com/resource/en/reference_manual/rm0008-stm32f101xx-stm32f102xx-stm32f103xx-stm32f105xx-and-stm32f107xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf",
+      "status": "ok",
+      "bytes": 13099796,
+      "sha256": "301abd2ecb1acf91d8be448939d3e89dfce04b0907908a9b06e1160159c5ef38"
+    },
+    {
+      "file": "st/DS5319-STM32F103x8-xB.pdf",
+      "title": "STM32F103x8/xB datasheet: pins, electrical limits, timings",
+      "url": "https://www.st.com/resource/en/datasheet/stm32f103c8.pdf",
+      "status": "ok",
+      "bytes": 2006428,
+      "sha256": "4741c03c5793745c1709ab48237ea23d204c4fc2ca735ceafa03367f32960917"
+    },
+    {
+      "file": "st/ES096.pdf",
+      "title": "Medium-density STM32F103x8/xB silicon errata",
+      "url": "https://www.st.com/resource/en/errata_sheet/es096-stm32f101x8b-stm32f102x8b-and-stm32f103x8b-mediumdensity-device-limitations-stmicroelectronics.pdf",
+      "status": "ok",
+      "bytes": 636081,
+      "sha256": "151ba211e98054f83c4f2d6393c6361c1cee93e869512e0c520adca04a43d4f8"
+    },
+    {
+      "file": "st/PM0056.pdf",
+      "title": "Cortex-M3 programming manual: NVIC, exceptions, SysTick, memory barriers",
+      "url": "https://www.st.com/resource/en/programming_manual/pm0056-stm32f10xxx20xxx21xxxl1xxxx-cortexm3-programming-manual-stmicroelectronics.pdf",
+      "status": "ok",
+      "bytes": 2098835,
+      "sha256": "773eaa32930fcd54fb987316cb8edc2f0716c7957f36bb62e721b0fa0be29671"
+    },
+    {
+      "file": "st/PM0075.pdf",
+      "title": "STM32F10xxx Flash memory programming",
+      "url": "https://www.st.com/resource/en/programming_manual/pm0075-stm32f10xxx-flash-memory-microcontrollers-stmicroelectronics.pdf",
+      "status": "ok",
+      "bytes": 302167,
+      "sha256": "01d15d20fba016790bb2aad0179188b83c430b9a8327be4ce5f036580c7af646"
+    },
+    {
+      "file": "st/AN2606.pdf",
+      "title": "System-memory boot modes and supported bootloader interfaces",
+      "url": "https://www.st.com/resource/en/application_note/an2606-introduction-to-system-memory-boot-mode-on-stm32-mcus-stmicroelectronics.pdf",
+      "status": "ok",
+      "bytes": 7062576,
+      "sha256": "b0ed4c4839c411311426ff5b6219595d269d79fa7cbc590a8bf77c91f098912c"
+    },
+    {
+      "file": "st/AN3155.pdf",
+      "title": "STM32 USART bootloader protocol used by tools/Stm32Serial.cs",
+      "url": "https://www.st.com/resource/en/application_note/an3155-usart-protocol-used-in-the-stm32-bootloader-stmicroelectronics.pdf",
+      "status": "ok",
+      "bytes": 1064264,
+      "sha256": "0202b41d62e359f744ec8b183c851417a31590c85253c27f818bc141c5d03611"
+    },
+    {
+      "file": "st/AN2586.pdf",
+      "title": "STM32F10xxx hardware development: power, reset, boot, debug",
+      "url": "https://www.st.com/resource/en/application_note/an2586-getting-started-with-stm32f10xxx-hardware-development-stmicroelectronics.pdf",
+      "status": "ok",
+      "bytes": 426285,
+      "sha256": "fbd855e1701f6cd0dce0caaa3821a35d782e18d7dc4977b2bff130bc4a916ad7"
+    },
+    {
+      "file": "st/AN2548.pdf",
+      "title": "STM32 DMA controller introduction, including STM32F1",
+      "url": "https://www.st.com/resource/en/application_note/an2548-introduction-to-dma-controller-for-stm32-mcus-stmicroelectronics.pdf",
+      "status": "ok",
+      "bytes": 270471,
+      "sha256": "809624b6305adb1cbbbc258fa7fb5e0fe7c992d5ae9cfcefefc59f0dfd5aefd5"
+    },
+    {
+      "file": "st/UM1850.pdf",
+      "title": "STM32F1 HAL and LL reference, for legacy comparison",
+      "url": "https://www.st.com/resource/en/user_manual/um1850-stm32cubef1-hal-driver-user-manual-stmicroelectronics.pdf",
+      "status": "ok",
+      "bytes": 26213552,
+      "sha256": "7d67100727cb3921402338d715e52e8f0704f26e99df7fa03c03d6979b32aa94"
+    },
+    {
+      "file": "st/UM2237.pdf",
+      "title": "STM32CubeProgrammer user manual and CLI",
+      "url": "https://www.st.com/resource/en/user_manual/um2237-stm32cubeprogrammer-software-description-stmicroelectronics.pdf",
+      "status": "ok",
+      "bytes": 15726955,
+      "sha256": "79d3d1055760155e76243ffa4da175a666031608e5f75eb77807343966aaf39e"
+    },
+    {
+      "file": "st/UM1075-STLINK.pdf",
+      "title": "ST-LINK/V2: SWD connection and debugger operation",
+      "url": "https://www.st.com/resource/en/user_manual/um1075-stlinkv2-incircuit-debuggerprogrammer-for-stm8-and-stm32-stmicroelectronics.pdf",
+      "status": "ok",
+      "bytes": 691897,
+      "sha256": "f8a06f2401aad35581a4fa500b558ceba49b6c0aea399b31608d01a9e4b69eeb"
+    },
+    {
+      "file": "dx-smart/DS_SX1261-2_V2_1.pdf",
+      "title": "SX1261/SX1262 datasheet v2.1 supplied in the DX-SMART information package",
+      "url": "https://www.semtech.com/products/wireless-rf/lora-connect/sx1262",
+      "local_only": true,
+      "note": "Local package snapshot, not a claim of the latest Semtech revision",
+      "status": "ok",
+      "bytes": 4130184,
+      "sha256": "3a82d71d6096a1a6a489a956dc5f9899c305567ae5f62d9c6fb8012f4003b73f"
+    }
+  ]
+}

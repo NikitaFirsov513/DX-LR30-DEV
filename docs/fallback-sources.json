@@ -1,0 +1,52 @@
+[
+  {
+    "file": "st/PM0056.pdf",
+    "url": "https://raw.githubusercontent.com/IsmaelLopesSilva/IoT/master/STM32/STM32F103C8T6/ST%20Docs/STM32F10xxx%20Programming%20Manual%20(PM0056%20-%20DocID15491%20Rev%206).pdf",
+    "note": "Archived ST PM0056 Rev 6, hosted by a third party"
+  },
+  {
+    "file": "st/PM0075.pdf",
+    "url": "https://raw.githubusercontent.com/IsmaelLopesSilva/IoT/master/STM32/STM32F103C8T6/ST%20Docs/STM32F10xxx%20-%20PM0075%20Programming%20Manual%20Flash%20Memory.pdf",
+    "note": "Archived original ST document; third-party repository source"
+  },
+  {
+    "file": "st/ES096.pdf",
+    "url": "https://www.stmcu.jp/wp/wp-content/uploads/2017/08/ES096_Rev14.pdf",
+    "note": "Archived original ST document; regional ST Japan source"
+  },
+  {
+    "file": "st/AN3155.pdf",
+    "url": "https://www.stmcu.jp/wp/wp-content/uploads/2017/08/AN3155_Rev21.pdf",
+    "note": "Archived original ST document; regional ST Japan source"
+  },
+  {
+    "file": "st/AN2606.pdf",
+    "url": "https://www.stmcu.jp/wp/wp-content/uploads/2017/08/AN2606_Rev69.pdf",
+    "note": "Archived original ST document; regional ST Japan source"
+  },
+  {
+    "file": "st/AN2586.pdf",
+    "url": "https://www.stmcu.jp/wp/wp-content/uploads/2017/08/DocID13675_Rev7.pdf",
+    "note": "Archived original ST document; regional ST Japan source"
+  },
+  {
+    "file": "st/AN2548.pdf",
+    "url": "https://www.stmcu.jp/wp/wp-content/uploads/2017/08/AN2548_Rev8.pdf",
+    "note": "Archived original ST document; regional ST Japan source"
+  },
+  {
+    "file": "st/UM1850.pdf",
+    "url": "https://www.stmcu.jp/wp/wp-content/uploads/2017/08/DocID027328_Rev2.pdf",
+    "note": "Archived original ST document; regional ST Japan source"
+  },
+  {
+    "file": "st/UM2237.pdf",
+    "url": "https://www.stmcu.jp/wp/wp-content/uploads/2017/12/UM2237_Rev30.pdf",
+    "note": "Archived original ST document; regional ST Japan source"
+  },
+  {
+    "file": "st/UM1075-STLINK.pdf",
+    "url": "https://raw.githubusercontent.com/IsmaelLopesSilva/IoT/master/STM32/STM32F103C8T6/ST%20Docs/ST-LINK%20V2%20User%20Manual%20(UM1075%20Rev%208).pdf",
+    "note": "Archived ST UM1075 Rev 8, hosted by a third party"
+  }
+]
