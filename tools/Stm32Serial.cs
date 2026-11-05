@@ -168,7 +168,7 @@ namespace Pj26Flash {
   void Address(uint address){byte[] b={(byte)(address>>24),(byte)(address>>16),(byte)(address>>8),(byte)address,0};b[4]=(byte)(b[0]^b[1]^b[2]^b[3]);wire.Write(b);Ack(2000);}
   public bool Sync(){try{wire.Write(new byte[]{0x7f});Ack(500);return true;}catch(TimeoutException){return false;}catch(IOException){return false;}}
   public ushort Id(){Command(2);int n=wire.Read(1,2000)[0]+1;byte[] b=wire.Read(n,2000);Ack(2000);if(n!=2)throw new IOException("Unexpected PID length");return (ushort)((b[0]<<8)|b[1]);}
-  public byte[] Commands(){Command(0);int n=wire.Read(1,2000)[0]+1;byte[] b=wire.Read(n,2000);Ack(2000);Console.WriteLine("Bootloader "+(b[0]>>4)+"."+(b[0]&15));return b;}
+  public byte[] Commands(){Command(0);int n=wire.Read(1,2000)[0]+1;byte[] b=wire.Read(n,2000);Ack(2000);return b;}
   public byte[] Read(uint address,int count){
    if(count<1||count>256)throw new ArgumentOutOfRangeException("count");
    Command(0x11);Address(address);byte n=(byte)(count-1);wire.Write(new byte[]{n,(byte)(n^255)});Ack(2000);return wire.Read(count,3000);
@@ -188,44 +188,62 @@ namespace Pj26Flash {
  }
 
  public static class Programmer {
+  static void Report(Action<string,string> report,string kind,string text){
+   if(report==null){Console.WriteLine(text);return;}
+   try{report(kind,text);}catch(Exception){/* Display failures must not interrupt Flash operations. */}
+  }
+  static void Progress(Action<string,string> report,string stage,int done,int total,ref int previous){
+   int percent=done*100/total;
+   if(percent==100||percent>=previous+5){previous=percent;Report(report,"progress."+stage,done+"/"+total);}
+  }
   public static void Run(string filename,string port,int baud,bool bootRts,bool resetDtr,int waitSeconds,bool probeOnly,string backupDirectory) {
+   Run(filename,port,baud,bootRts,resetDtr,waitSeconds,probeOnly,backupDirectory,null);
+  }
+  public static void Run(string filename,string port,int baud,bool bootRts,bool resetDtr,int waitSeconds,bool probeOnly,string backupDirectory,Action<string,string> report) {
    Image image=probeOnly?null:Image.Load(filename); // Validate before opening or resetting anything.
+   Report(report,"stage.connect",port+" / "+baud+" / 8E1");
    using(IWire wire=new WinCom(port,baud)){
     Bootloader boot=new Bootloader(wire);bool connected=false;
-    Console.WriteLine("Port: "+port+" @ "+baud+" 8E1");
     wire.Lines(bootRts,resetDtr);Thread.Sleep(100);
     wire.Lines(bootRts,!resetDtr);Thread.Sleep(100);wire.Purge();
     for(int i=0;i<3&&!connected;i++)connected=boot.Sync();
     if(!connected&&waitSeconds>0){
-     Console.WriteLine("AUTO RESET: no ACK. Press and release the physical RST button now ("+waitSeconds+" seconds).");
+     Report(report,"wait.reset",waitSeconds.ToString());
      DateTime deadline=DateTime.UtcNow.AddSeconds(waitSeconds);
-     while(DateTime.UtcNow<deadline&&!connected)connected=boot.Sync();
+     int lastSeconds=waitSeconds;
+     while(DateTime.UtcNow<deadline&&!connected){
+      connected=boot.Sync();int remaining=Math.Max(0,(int)Math.Ceiling((deadline-DateTime.UtcNow).TotalSeconds));
+      if(!connected&&remaining!=lastSeconds){lastSeconds=remaining;Report(report,"wait.tick",remaining.ToString());}
+     }
     }
     if(!connected)throw new IOException("No bootloader ACK. Check RTS/DTR profile and press RST on the next attempt.");
-    ushort id=boot.Id();Console.WriteLine("PID: 0x"+id.ToString("X4"));
+    ushort id=boot.Id();
     if(id!=0x410)throw new IOException("Unexpected MCU; expected STM32F1 medium-density PID 0x0410. No Flash changes made.");
     byte[] cmds=boot.Commands();
     foreach(byte required in new byte[]{0x11,0x21,0x31,0x43})
      if(Array.IndexOf(cmds,required)<0)throw new IOException("Required command not supported: 0x"+required.ToString("X2"));
     byte[] size=boot.Read(0x1ffff7e0,2);int flashKb=size[0]|(size[1]<<8);
-    Console.WriteLine("Flash size: "+flashKb+" KiB");
     if(flashKb!=64&&flashKb!=128)throw new IOException("Unexpected Flash size; no Flash changes made.");
-    if(probeOnly){Console.WriteLine("PROBE OK: no erase or programming performed.");return;}
+    Report(report,"done.connect","PID 0x"+id.ToString("X4")+" | Bootloader "+(cmds[0]>>4)+"."+(cmds[0]&15)+" | Flash "+flashKb+" KiB");
+    if(probeOnly){Report(report,"done.probe","Read-only connection test passed");return;}
     Directory.CreateDirectory(backupDirectory);
     string backup=Path.Combine(backupDirectory,port+"-"+DateTime.Now.ToString("yyyyMMdd-HHmmss-fff")+".bin");
-    using(FileStream file=File.Create(backup))for(uint a=0;a<Image.Capacity;a+=256){byte[] block=boot.Read(Image.Base+a,256);file.Write(block,0,block.Length);}
-    Console.WriteLine("Backup: "+backup);
+    Report(report,"stage.backup",backup);int previous=-5;
+    using(FileStream file=File.Create(backup))for(uint a=0;a<Image.Capacity;a+=256){byte[] block=boot.Read(Image.Base+a,256);file.Write(block,0,block.Length);Progress(report,"backup",(int)a+256,Image.Capacity,ref previous);}
+    Report(report,"done.backup",backup);
     int pages=(image.Bytes.Length+1023)/1024;
-    Console.WriteLine("Erase application pages: "+pages);boot.ErasePages(pages);
+    Report(report,"stage.erase",pages.ToString());boot.ErasePages(pages);Report(report,"done.erase",pages.ToString());
+    Report(report,"stage.write",image.Length.ToString());previous=-5;
     for(int offset=0;offset<image.Bytes.Length;offset+=256){
-     byte[] block=new byte[256];Array.Copy(image.Bytes,offset,block,0,256);boot.Write(Image.Base+(uint)offset,block);
+     byte[] block=new byte[256];Array.Copy(image.Bytes,offset,block,0,256);boot.Write(Image.Base+(uint)offset,block);Progress(report,"write",offset+256,image.Bytes.Length,ref previous);
     }
-    Console.WriteLine("Write OK: "+image.Length+" bytes");
+    Report(report,"done.write",image.Length.ToString());Report(report,"stage.verify",image.Length.ToString());previous=-5;
     for(int offset=0;offset<image.Bytes.Length;offset+=256){
      byte[] block=boot.Read(Image.Base+(uint)offset,256);
      for(int i=0;i<256;i++)if(block[i]!=image.Bytes[offset+i])throw new IOException("Verify mismatch at 0x"+(Image.Base+(uint)offset+(uint)i).ToString("X8"));
+     Progress(report,"verify",offset+256,image.Bytes.Length,ref previous);
     }
-    Console.WriteLine("Verify OK");boot.Go();Console.WriteLine("Run OK at 0x08000000");
+    Report(report,"done.verify",image.Length.ToString());Report(report,"stage.run","0x08000000");boot.Go();Report(report,"done.run","0x08000000");
    }
   }
  }

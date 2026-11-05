@@ -24,7 +24,7 @@ function Resolve-Pj26Port {
             $list = ($candidates | ForEach-Object { $_.Port + ': ' + $_.Name }) -join '; '
             throw "Multiple compatible USB-serial devices found: $list. Disconnect the other board or use -OverridePort COMx."
         }
-        Write-Host ('Auto-detected: ' + $candidates[0].Port + ' - ' + $candidates[0].Name)
+        Write-Verbose ('Auto-detected: ' + $candidates[0].Port + ' - ' + $candidates[0].Name)
         return $candidates[0].Port.ToUpperInvariant()
     }
     if ($chosen -notmatch '^COM[1-9][0-9]*$') { throw 'Port must be AUTO or COMx.' }
