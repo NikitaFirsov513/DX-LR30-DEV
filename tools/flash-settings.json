@@ -1,0 +1,11 @@
+{
+  "port": "AUTO",
+  "baud": 230400,
+  "bootRts": false,
+  "resetDtr": true,
+  "waitResetSeconds": 25,
+  "usbHardwareIds": [
+    "VID_1A86&PID_7523",
+    "VID_1A86&PID_5523"
+  ]
+}

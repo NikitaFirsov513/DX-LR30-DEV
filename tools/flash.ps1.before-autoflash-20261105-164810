@@ -1,0 +1,20 @@
+param(
+    [Parameter(Mandatory = $true)][string]$Firmware,
+    [string]$Port,
+    [string]$McuIsp = 'D:/PROJECTS/ST/LoRaModule-DX-LR30-900Mhz/DX-LR30-900Mhz Information Package/DX-LR30-900Mhz Information Package/05 Testing Tools/STM32F103 burning tool/mcuisp.exe'
+)
+$ErrorActionPreference = 'Stop'
+$hexFile = (Resolve-Path -LiteralPath $Firmware).Path
+if ([IO.Path]::GetExtension($hexFile) -ne '.hex') {
+    throw 'Select the Intel HEX output in EIDE Program File.'
+}
+Write-Host "HEX: $hexFile"
+Write-Host "COM port suggestion: $Port (select the connected PJ26 explicitly)"
+Write-Host 'PJ26: STM ISP; Reset@DTR High(>+3V), ISP@RTS Low.'
+Write-Host 'First Read ChipInfo + RST. Load the HEX above, then Start ISP with Verify.'
+Write-Host 'This helper opens MCUISP. It does not program or erase the MCU automatically.'
+if (-not (Test-Path -LiteralPath $McuIsp -PathType Leaf)) {
+    throw 'MCUISP not found. Set -McuIsp to the utility from your manufacturer package.'
+}
+# This GUI is intentionally visible: the user selects the device and starts ISP.
+Start-Process -FilePath $McuIsp -WorkingDirectory (Split-Path -LiteralPath $McuIsp)

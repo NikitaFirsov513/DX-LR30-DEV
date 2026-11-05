@@ -1,0 +1,46 @@
+# Прошивка из EIDE через USB-C
+
+Кнопка Flash теперь запускает собственный скрипт записи STM32 USART ISP. MCUISP не открывается; HEX передаётся из активного target EIDE автоматически. После установки обновления один раз выполнить в VS Code `Developer: Reload Window`, чтобы EIDE перечитал изменённую команду Flash.
+
+1. В `tools/flash-settings.json` по умолчанию стоит **AUTO**. Скрипт находит подключённый USB–UART CH340/CH341 по аппаратным VID/PID, исключая Bluetooth COM4/COM5. Если подключены две подходящие платы, он показывает список и просит отключить вторую либо указать `-OverridePort COMx`.
+2. Закрыть HTerm, MCUISP и CubeProgrammer, если они используют этот порт.
+3. Собрать нужный target и нажать Flash.
+4. Если появилось `AUTO RESET: no ACK. Press and release the physical RST button now`, один раз нажать **RST на плате**. Скрипт ждёт 25 секунд и продолжит без других действий.
+5. Успешный результат: `Write OK`, `Verify OK`, `Run OK at 0x08000000`.
+
+Скрипт сначала проверяет контрольные суммы HEX, диапазон 64 КиБ Flash и векторы запуска. После соединения проверяет PID 0x0410, сохраняет копию 64 КиБ Flash в `build/backups`, стирает только страницы приложения, записывает HEX, сравнивает прочитанные байты и запускает программу. Option bytes и защита чтения не меняются.
+
+Проверка на этой PJ26 показала: при уровне RTS из конфигурации и физическом RST загрузчик отвечает; только переключение DTR ответа пока не дало. Поэтому запись и проверка автоматические, а при необходимости остаётся одно нажатие RST. Переносить названия High/Low из MCUISP непосредственно в `bootRts/resetDtr` не следует: это значения Windows API для CH340.
+
+Проверено 5 ноября 2026 на COM7: PID 0x0410, загрузчик 2.2, Flash 64 КиБ; резервная копия сохранена, 16 страниц приложения стёрты, 15 872 байта записаны, проверка чтением прошла, выполнен запуск с 0x08000000.
+
+Проверка соединения без записи:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/flash.ps1 -ProbeOnly
+```
+
+Запись вручную той же командой, что использует EIDE:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/flash.ps1 -Firmware build/Radio/dx_lr30_pj26.hex
+```
+
+Только проверка файла без доступа к плате: добавить `-DryRun`.
+Для другой платы обычно достаточно оставить AUTO: изменение номера COM определяется при каждом запуске. При нескольких платах можно явно передать `-OverridePort COM6` или временно указать COM6 в JSON. Старый аргумент EIDE `-Port` считается только подсказкой и не переопределяет автоопределение или явный выбор. Это защищает от сохранённой EIDE команды с Bluetooth-портом COM5.
+
+Список обнаруженных COM-устройств без подключения к ним:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/flash.ps1 -ListPorts
+```
+
+Тест выбора порта на моделях списка устройств: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/test-serial-ports.ps1`.
+
+Программные тесты HEX-парсера и протокола с моделью STM32, без оборудования:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/test-flasher.ps1
+```
+
+Протокол: ST AN3155, https://www.st.com/resource/en/application_note/an3155-usart-protocol-used-in-the-stm32-bootloader-stmicroelectronics.pdf

@@ -1,0 +1,5 @@
+build/
+.eide/log/
+.eide/*.lock
+.vscode/.browse.c_cpp.db*
+__pycache__/
