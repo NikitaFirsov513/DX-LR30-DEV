@@ -1,40 +1,143 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "build",
-            "type": "shell",
-            "command": "${command:eide.project.build}",
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "flash",
-            "type": "shell",
-            "command": "${command:eide.project.uploadToDevice}",
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "build and flash",
-            "type": "shell",
-            "command": "${command:eide.project.buildAndFlash}",
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "rebuild",
-            "type": "shell",
-            "command": "${command:eide.project.rebuild}",
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "clean",
-            "type": "shell",
-            "command": "${command:eide.project.clean}",
-            "group": "build",
-            "problemMatcher": []
-        }
-    ]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Radio",
+      "type": "process",
+      "command": "${config:pj26.python}",
+      "args": [
+        "tools/build.py",
+        "--target",
+        "Radio"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Flash Radio",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tools/flash.ps1",
+        "-Firmware",
+        "build/Radio/dx_lr30_pj26.hex"
+      ],
+      "dependsOn": "Build Radio",
+      "dependsOrder": "sequence",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build UART",
+      "type": "process",
+      "command": "${config:pj26.python}",
+      "args": [
+        "tools/build.py",
+        "--target",
+        "UART"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Flash UART",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tools/flash.ps1",
+        "-Firmware",
+        "build/UART/dx_lr30_pj26.hex"
+      ],
+      "dependsOn": "Build UART",
+      "dependsOrder": "sequence",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Check project",
+      "type": "process",
+      "command": "${config:pj26.python}",
+      "args": [
+        "tools/test.py"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "label": "List boards",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tools/flash.ps1",
+        "-ListPorts"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Flash console preview",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tools/flash.ps1",
+        "-Preview"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "EIDE: build",
+      "command": "${command:eide.project.build}",
+      "problemMatcher": []
+    },
+    {
+      "label": "EIDE: flash",
+      "command": "${command:eide.project.uploadToDevice}",
+      "problemMatcher": []
+    }
+  ]
 }

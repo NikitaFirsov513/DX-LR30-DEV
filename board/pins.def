@@ -1,0 +1,18 @@
+/* Signal, GPIO port, bit number, F1 mode, initial output/pull level.
+ * This table is compiled by board.c and checked against the CubeMX view.
+ * PA13/PA14 remain SWD; PD0/PD1 are HSE; PC15 is DIO1, so LSE stays off.
+ * DIO2 has no confirmed MCU connection. Never invent one from the header.
+ */
+BOARD_PIN(RADIO_TXEN,  A,  0, OUTPUT_PP, 0)
+BOARD_PIN(RADIO_RXEN,  A,  1, OUTPUT_PP, 1)
+BOARD_PIN(RADIO_BUSY,  A,  2, INPUT_PULL, 1)
+BOARD_PIN(RADIO_NRST,  A,  3, OUTPUT_PP, 1)
+BOARD_PIN(RADIO_NSS,   A,  4, OUTPUT_PP, 1)
+BOARD_PIN(SPI1_SCK,    A,  5, AF_PP, 0)
+BOARD_PIN(SPI1_MISO,   A,  6, INPUT_FLOAT, 0)
+BOARD_PIN(SPI1_MOSI,   A,  7, AF_PP, 0)
+BOARD_PIN(USART1_TX,   A,  9, AF_PP, 1)
+BOARD_PIN(USART1_RX,   A, 10, INPUT_PULL, 1)
+BOARD_PIN(KEY,         B, 12, INPUT_PULL, 1)
+BOARD_PIN(LED,         C, 13, OUTPUT_PP_2MHZ, 1)
+BOARD_PIN(RADIO_DIO1,  C, 15, INPUT_PULL, 0)

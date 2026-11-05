@@ -1,0 +1,87 @@
+{
+  "checked_at": "2026-11-05T17:20:15.340050+00:00",
+  "documents": [
+    {
+      "file": "st/PM0056.pdf",
+      "url": "https://raw.githubusercontent.com/IsmaelLopesSilva/IoT/master/STM32/STM32F103C8T6/ST%20Docs/STM32F10xxx%20Programming%20Manual%20(PM0056%20-%20DocID15491%20Rev%206).pdf",
+      "note": "Archived ST PM0056 Rev 6, hosted by a third party",
+      "status": "ok",
+      "bytes": 2098835,
+      "sha256": "773eaa32930fcd54fb987316cb8edc2f0716c7957f36bb62e721b0fa0be29671"
+    },
+    {
+      "file": "st/PM0075.pdf",
+      "url": "https://raw.githubusercontent.com/IsmaelLopesSilva/IoT/master/STM32/STM32F103C8T6/ST%20Docs/STM32F10xxx%20-%20PM0075%20Programming%20Manual%20Flash%20Memory.pdf",
+      "note": "Archived original ST document; third-party repository source",
+      "status": "ok",
+      "bytes": 302167,
+      "sha256": "01d15d20fba016790bb2aad0179188b83c430b9a8327be4ce5f036580c7af646"
+    },
+    {
+      "file": "st/ES096.pdf",
+      "url": "https://www.stmcu.jp/wp/wp-content/uploads/2017/08/ES096_Rev14.pdf",
+      "note": "Archived original ST document; regional ST Japan source",
+      "status": "ok",
+      "bytes": 636081,
+      "sha256": "151ba211e98054f83c4f2d6393c6361c1cee93e869512e0c520adca04a43d4f8"
+    },
+    {
+      "file": "st/AN3155.pdf",
+      "url": "https://www.stmcu.jp/wp/wp-content/uploads/2017/08/AN3155_Rev21.pdf",
+      "note": "Archived original ST document; regional ST Japan source",
+      "status": "ok",
+      "bytes": 1064264,
+      "sha256": "0202b41d62e359f744ec8b183c851417a31590c85253c27f818bc141c5d03611"
+    },
+    {
+      "file": "st/AN2606.pdf",
+      "url": "https://www.stmcu.jp/wp/wp-content/uploads/2017/08/AN2606_Rev69.pdf",
+      "note": "Archived original ST document; regional ST Japan source",
+      "status": "ok",
+      "bytes": 7062576,
+      "sha256": "b0ed4c4839c411311426ff5b6219595d269d79fa7cbc590a8bf77c91f098912c"
+    },
+    {
+      "file": "st/AN2586.pdf",
+      "url": "https://www.stmcu.jp/wp/wp-content/uploads/2017/08/DocID13675_Rev7.pdf",
+      "note": "Archived original ST document; regional ST Japan source",
+      "status": "ok",
+      "bytes": 426285,
+      "sha256": "fbd855e1701f6cd0dce0caaa3821a35d782e18d7dc4977b2bff130bc4a916ad7"
+    },
+    {
+      "file": "st/AN2548.pdf",
+      "url": "https://www.stmcu.jp/wp/wp-content/uploads/2017/08/AN2548_Rev8.pdf",
+      "note": "Archived original ST document; regional ST Japan source",
+      "status": "ok",
+      "bytes": 270471,
+      "sha256": "809624b6305adb1cbbbc258fa7fb5e0fe7c992d5ae9cfcefefc59f0dfd5aefd5"
+    },
+    {
+      "file": "st/UM1850.pdf",
+      "url": "https://www.stmcu.jp/wp/wp-content/uploads/2017/08/DocID027328_Rev2.pdf",
+      "note": "Archived original ST document; regional ST Japan source",
+      "resolved_url": "https://www.stmcu.jp/wp/wp-content/uploads/2017/08/DocID027328_Rev2.pdf",
+      "status": "ok",
+      "bytes": 26213552,
+      "sha256": "7d67100727cb3921402338d715e52e8f0704f26e99df7fa03c03d6979b32aa94"
+    },
+    {
+      "file": "st/UM2237.pdf",
+      "url": "https://www.stmcu.jp/wp/wp-content/uploads/2017/12/UM2237_Rev30.pdf",
+      "note": "Archived original ST document; regional ST Japan source",
+      "resolved_url": "https://www.stmcu.jp/wp/wp-content/uploads/2017/12/UM2237_Rev30.pdf",
+      "status": "ok",
+      "bytes": 15726955,
+      "sha256": "79d3d1055760155e76243ffa4da175a666031608e5f75eb77807343966aaf39e"
+    },
+    {
+      "file": "st/UM1075-STLINK.pdf",
+      "url": "https://raw.githubusercontent.com/IsmaelLopesSilva/IoT/master/STM32/STM32F103C8T6/ST%20Docs/ST-LINK%20V2%20User%20Manual%20(UM1075%20Rev%208).pdf",
+      "note": "Archived ST UM1075 Rev 8, hosted by a third party",
+      "status": "ok",
+      "bytes": 691897,
+      "sha256": "f8a06f2401aad35581a4fa500b558ceba49b6c0aea399b31608d01a9e4b69eeb"
+    }
+  ]
+}

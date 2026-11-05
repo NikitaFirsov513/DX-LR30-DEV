@@ -1,0 +1,11 @@
+{
+  "name": "dx_lr30_pj26",
+  "device": "STM32F103C8T6",
+  "flash_bytes": 65536,
+  "ram_bytes": 20480,
+  "source_dirs": ["app", "board", "mcu", "devices", "vendor"],
+  "include_dirs": ["app", "board", "mcu", "devices/sx126x", "vendor/semtech", "vendor/cmsis/Include", "vendor/cmsis/Device/ST/STM32F1xx/Include"],
+  "defines": ["STM32F103xB", "HSE_VALUE=8000000"],
+  "targets": {"Radio": [], "UART": ["UART_ONLY=1"]},
+  "linker_script": "STM32F103C8TX_FLASH.ld"
+}

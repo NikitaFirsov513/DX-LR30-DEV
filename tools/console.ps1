@@ -59,6 +59,11 @@ function Write-Pj26Metadata {
         Write-Pj26Log 'firmware' $File
     }
     $deviceLabel = $Device -replace '\s*\(COM\d+\)\s*$', ''
+    if (-not $Port) {
+        Write-Host '  Порт     не используется при проверке HEX' -ForegroundColor DarkGray
+        Write-Host ''
+        return
+    }
     Write-Host ('  Порт     ' + $Port + ' | ' + $deviceLabel + ' | ' + $Baud + ' бод')
     Write-Host ''
     Write-Pj26Log 'port' ($Port + ' / ' + $Device + ' / ' + $Baud + ' / 8E1')

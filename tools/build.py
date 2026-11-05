@@ -1,64 +1,83 @@
-"""Standalone GCC build using the sources and settings in the EIDE project."""
+"""Build the CMSIS firmware from a terminal, editor or agent (Python stdlib only)."""
 import argparse
-from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 
+
+def local_tool(name):
+    path = ROOT/'tools/local-settings.json'
+    if not path.is_file():
+        return None
+    settings = json.loads(path.read_text(encoding='utf-8-sig'))
+    value = settings.get(name)
+    if value is None or value == '':
+        return None
+    if not isinstance(value, str):
+        raise SystemExit(f'{path.name}: {name} must be a path string.')
+    return os.path.expandvars(os.path.expanduser(value))
+
+
+def find_tool(name, env, candidates):
+    value = os.environ.get(env) or local_tool(env) or shutil.which(name)
+    if value:
+        return str(value)
+    for candidate in candidates:
+        if candidate.is_file():
+            return str(candidate)
+    raise SystemExit(f'{name} not found. Set {env}, tools/local-settings.json or PATH.')
+
+
+def gcc_directory(explicit=None):
+    value = explicit or os.environ.get('ARM_GCC_DIR') or local_tool('ARM_GCC_DIR')
+    if value:
+        directory = Path(value)
+        if (directory/'bin').is_dir():
+            directory /= 'bin'
+    else:
+        compiler = shutil.which('arm-none-eabi-gcc')
+        directory = Path(compiler).parent if compiler else Path.home()/'.eide/tools/gcc_arm/bin'
+    suffix = '.exe' if os.name == 'nt' else ''
+    if not (directory/('arm-none-eabi-gcc'+suffix)).is_file():
+        raise SystemExit('Arm GCC not found. Set ARM_GCC_DIR or pass --gcc-dir.')
+    return directory.resolve()
+
+
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--target', choices=['Radio', 'UART'], default='Radio')
-    parser.add_argument('--gcc-dir', default=os.environ.get('ARM_GCC_DIR'))
+    parser.add_argument('--gcc-dir')
+    parser.add_argument('--fresh', action='store_true', help='Reset only the CMake configuration')
     args = parser.parse_args()
-    gccdir = Path(args.gcc_dir) if args.gcc_dir else Path.home()/'.eide/tools/gcc_arm/bin'
-    if not (gccdir/'arm-none-eabi-gcc.exe').is_file() and (gccdir/'bin').is_dir():
-        gccdir /= 'bin'
-    gcc = str(gccdir/'arm-none-eabi-gcc.exe')
-    cfg = json.loads((ROOT/'.eide/eide.yml').read_text(encoding='utf8'))
-    target = cfg['targets'][args.target]
-    pp = target['cppPreprocessAttrs']
+    gccdir = gcc_directory(args.gcc_dir)
+    cmake = find_tool('cmake', 'CMAKE_EXE', [Path('C:/Program Files/CMake/bin/cmake.exe')])
+    ninja = find_tool('ninja', 'NINJA_EXE', [])
     out = ROOT/'build'/args.target
-    out.mkdir(parents=True, exist_ok=True)
-    common = ['-mcpu=cortex-m3', '-mthumb', '-mfloat-abi=soft', '-Os', '-g3',
-              '-ffunction-sections', '-fdata-sections', '-fno-common',
-              '-Wall', '-Wextra', '-Wno-unused-parameter', '-std=gnu11']
-    common += ['-D'+s for s in pp['defineList']]
-    common += ['-I'+s for s in pp['incList']]
-    sources = sorted(p for d in cfg['srcDirs'] for p in (ROOT/d).rglob('*')
-                     if p.suffix in ['.c', '.s'])
-    commands, objs = [], []
-    for src in sources:
-        obj = out/(src.relative_to(ROOT).as_posix().replace('/', '_')+'.o')
-        cmd = [gcc, *common, '-c', str(src.relative_to(ROOT)), '-o', str(obj)]
-        commands.append(cmd)
-        objs.append(str(obj))
-    def compile_one(cmd):
-        proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True,
-                              encoding='utf8', errors='replace')
-        return proc.returncode, proc.stdout + proc.stderr
-    with ThreadPoolExecutor(max_workers=6) as pool:
-        results = list(pool.map(compile_one, commands))
-    log = ''.join(text for _, text in results)
-    (out/'compile.log').write_text(log, encoding='utf8')
-    if log:
-        print(log)
-    if any(code for code, _ in results):
-        raise SystemExit('Compilation failed; see build/<target>/compile.log')
-    elf = out/'dx_lr30_pj26.elf'
-    cmd = [gcc, *common[:3], '-specs=nano.specs', '-specs=nosys.specs',
-           '-TSTM32F103C8TX_FLASH.ld', '-Wl,--gc-sections',
-           '-Wl,-Map='+str(out/'dx_lr30_pj26.map'), *objs, '-o', str(elf)]
-    subprocess.run(cmd, cwd=ROOT, check=True)
-    for fmt, suffix in [('ihex', 'hex'), ('binary', 'bin')]:
-        subprocess.run([str(gccdir/'arm-none-eabi-objcopy.exe'), '-O', fmt,
-                        str(elf), str(elf.with_suffix('.'+suffix))], check=True)
-    subprocess.run([str(gccdir/'arm-none-eabi-size.exe'), str(elf)], check=True)
-    compile_db = [{'directory':str(ROOT), 'file':cmd[-3], 'arguments':cmd} for cmd in commands]
-    (out/'compile_commands.json').write_text(json.dumps(compile_db, indent=2), encoding='utf8')
-    print('Built', elf.with_suffix('.hex'))
+    cmd = [cmake, '-S', str(ROOT), '-B', str(out), '-G', 'Ninja',
+           '-DARM_GCC_DIR='+str(gccdir), '-DCMAKE_MAKE_PROGRAM='+ninja,
+           '-DPJ26_TARGET='+args.target]
+    if args.fresh or not (out/'CMakeCache.txt').exists():
+        cmd += ['-DCMAKE_TOOLCHAIN_FILE='+str(ROOT/'cmake/arm-none-eabi.cmake')]
+    if args.fresh:
+        cmd += ['--fresh']
+    subprocess.run(cmd, check=True)
+    subprocess.run([cmake, '--build', str(out), '--parallel'], check=True)
+    suffix = '.exe' if os.name == 'nt' else ''
+    version = subprocess.check_output([str(gccdir/('arm-none-eabi-gcc'+suffix)), '--version'], text=True).splitlines()[0]
+    (out/'build-info.json').write_text(json.dumps({'target': args.target, 'compiler': version,
+        'gcc_dir': str(gccdir), 'manifest': json.loads((ROOT/'project.json').read_text())}, indent=2)+'\n')
+    print('Built:', out/'dx_lr30_pj26.hex')
+
 
 if __name__ == '__main__':
-    main()
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+    try:
+        main()
+    except subprocess.CalledProcessError as error:
+        raise SystemExit(error.returncode)

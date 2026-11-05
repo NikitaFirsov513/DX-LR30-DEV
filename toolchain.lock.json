@@ -1,0 +1,12 @@
+{
+  "validated_tools": {
+    "arm_gcc": "14.3.1 (Arm GNU Toolchain 14.3.Rel1)",
+    "cmake": "4.1.0-rc2",
+    "ninja": "1.11.1",
+    "host_tests": "MSVC 19.44 / Windows SDK 10.0.26100"
+  },
+  "minimum_cmake": "3.24",
+  "minimum_python": "3.10",
+  "dependency_lock": "vendor/lock.json",
+  "device_pack_docs": "Keil.STM32F1xx_DFP.2.4.1"
+}
