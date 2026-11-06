@@ -20,7 +20,7 @@ Use the repository containing this file as the project root. Do not modify other
 - ISR callbacks only capture data/events. Never run SPI radio commands, printf, delays or blocking UART TX in interrupts.
 - Restore the saved PRIMASK after critical sections; never blindly enable interrupts.
 - Bound hardware waits and propagate transport errors. Use unsigned elapsed-time subtraction for tick wraparound.
-- Keep the existing air interface unless the user requests a change: 868.1 MHz, SF9, BW125, CR4/6, preamble 8, explicit header, CRC off, IQ normal, +10 dBm.
+- Keep the existing air interface unless the user requests a change: 868.1 MHz, SF9, BW125, CR4/6, preamble 8, explicit header, CRC on/required in RX, IQ normal, +10 dBm. CRC was enabled at the user's request after the V-0.1.0 baseline.
 - No unsolicited ACK, addressing, RTOS, frequency or transmit-power changes.
 - Consult local RM0008, datasheet and errata before changing register sequences. Documentation index: docs/README.md. Archived versions are identified there.
 
