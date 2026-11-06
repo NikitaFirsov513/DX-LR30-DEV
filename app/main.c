@@ -8,6 +8,7 @@
 #ifndef UART_ONLY
 #include "spi.h"
 #include "radio.h"
+#include "diagnostics.h"
 #endif
 #include <stdio.h>
 
@@ -18,9 +19,27 @@ static void on_byte(uint8_t byte) { serial_frames_feed(&frames, byte); }
 static void on_idle(void) { serial_frames_flush(&frames); }
 static void on_uart_error(void) { serial_frames_discard(&frames); }
 
+#ifndef UART_ONLY
+static bool write_radio_diagnostics(void)
+{
+    radio_stats_t stats;
+    radio_get_stats(&stats);
+    uint32_t saved = irq_lock();
+    uint32_t dropped = frames.dropped;
+    irq_restore(saved);
+    char report[DIAGNOSTICS_REPORT_BYTES];
+    size_t size = diagnostics_format(report, sizeof report, &stats, radio_state(),
+                                      clock_millis(), uart_error_count(), dropped);
+    return size && uart_write((const uint8_t *)report, size);
+}
+#endif
+
 static void panic(const char *message)
 {
     printf("ERROR: %s\r\n", message);
+#ifndef UART_ONLY
+    (void)write_radio_diagnostics();
+#endif
     board_radio_off();
     for (;;) { __WFI(); }
 }
@@ -46,12 +65,20 @@ int main(void)
     spi_init();
     if (!radio_init(on_radio_receive)) panic(radio_error());
     board_radio_irq_init(radio_notify_irq);
-    printf("Radio ready: 868100000 Hz; SF9 BW125 CR4/6; +10 dBm\r\n");
+    diagnostics_button_t diagnostics;
+    diagnostics_button_init(&diagnostics, board_key_pressed(), clock_millis());
+    printf("Radio ready: 868100000 Hz; SF9 BW125 CR4/6; CRC on; +10 dBm\r\n");
+    printf("KEY: local radio statistics (9600 8N1)\r\n");
 #endif
     for (;;) {
 #ifndef UART_ONLY
         radio_poll();
         if (radio_state() == RADIO_FAULT) panic(radio_error());
+        if (diagnostics_button_poll(&diagnostics, board_key_pressed(), clock_millis(), radio_can_send())) {
+            if (!write_radio_diagnostics()) panic("Diagnostics UART timeout");
+            /* Poll the radio again after the blocking UART report before starting TX. */
+            continue;
+        }
         if (!radio_can_send()) continue;
 #endif
         uint8_t data[FRAME_MAX_BYTES], length;

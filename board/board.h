@@ -11,6 +11,7 @@ enum { BOARD_PORT_A=0, BOARD_PORT_B=1, BOARD_PORT_C=2 };
 #undef BOARD_PIN
 
 void board_init(void);
+bool board_key_pressed(void);
 void board_radio_rx(void);
 void board_radio_tx(void);
 void board_radio_off(void);

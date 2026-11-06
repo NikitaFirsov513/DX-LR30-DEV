@@ -33,6 +33,8 @@ void board_init(void)
     timer_init();
 }
 
+bool board_key_pressed(void) { return !gpio_read(BOARD_KEY); }
+
 void board_radio_rx(void)
 {
     gpio_write(BOARD_RADIO_TXEN, false);

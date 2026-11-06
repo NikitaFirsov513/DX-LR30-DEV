@@ -12,9 +12,12 @@ static volatile bool irq_pending;
 static uint32_t tx_started;
 static const char *last_error;
 static uint8_t received[255];
+static uint8_t tx_length;
+static radio_stats_t stats;
 
 static bool fail(const char *operation)
 {
+    stats.transport_errors++;
     last_error = operation;
     state = RADIO_FAULT;
     board_radio_off();
@@ -86,6 +89,8 @@ bool radio_send(const uint8_t *data, uint8_t length)
     board_radio_tx();
     REQUIRE(sx126x_set_tx(NULL, RADIO_TX_TIMEOUT_MS));
     tx_started = clock_millis();
+    tx_length = length;
+    stats.tx_started++;
     state = RADIO_TRANSMITTING;
     return true;
 }
@@ -99,14 +104,48 @@ static bool handle_irq(void)
     REQUIRE(sx126x_clear_irq_status(NULL, SX126X_IRQ_ALL));
     if (!irq) return true;
     REQUIRE(sx126x_set_standby(NULL, SX126X_STANDBY_CFG_RC));
-    if ((irq & SX126X_IRQ_RX_DONE) && !(irq & (SX126X_IRQ_CRC_ERROR | SX126X_IRQ_HEADER_ERROR))) {
-        sx126x_rx_buffer_status_t buffer;
-        REQUIRE(sx126x_get_rx_buffer_status(NULL, &buffer));
-        REQUIRE(sx126x_read_buffer(NULL, buffer.buffer_start_pointer, received, buffer.pld_len_in_bytes));
-        /* Restore RX payload limit after transmitting a shorter packet. */
-        if (!packet_params(255) || !enter_receive()) return false;
-        if (receive_callback) receive_callback(received, buffer.pld_len_in_bytes);
-        return true;
+    bool transmitting = state == RADIO_TRANSMITTING;
+    if (irq & SX126X_IRQ_TIMEOUT) {
+        if (transmitting) stats.tx_timeouts++;
+        else stats.rx_timeouts++;
+    }
+    if (transmitting) {
+        if ((irq & SX126X_IRQ_TX_DONE) && !(irq & SX126X_IRQ_TIMEOUT)) {
+            stats.tx_packets++;
+            stats.tx_bytes += tx_length;
+        }
+    } else {
+        if (irq & SX126X_IRQ_CRC_ERROR) stats.crc_errors++;
+        if (irq & SX126X_IRQ_HEADER_ERROR) stats.header_errors++;
+        if ((irq & SX126X_IRQ_RX_DONE) &&
+            !(irq & (SX126X_IRQ_CRC_ERROR | SX126X_IRQ_HEADER_ERROR | SX126X_IRQ_TIMEOUT))) {
+            bool has_crc = true;
+            if (RADIO_CRC_ENABLED) {
+                /* Explicit-header RX follows the incoming CRC flag, not SetPacketParams.
+                 * Reject legacy CRC-off packets instead of calling them verified.
+                 */
+                sx126x_lora_cr_t coding_rate;
+                REQUIRE(sx126x_get_lora_params_from_header(NULL, &coding_rate, &has_crc));
+            }
+            if (!has_crc) {
+                stats.rx_no_crc++;
+            } else {
+                sx126x_rx_buffer_status_t buffer;
+                sx126x_pkt_status_lora_t status;
+                REQUIRE(sx126x_get_rx_buffer_status(NULL, &buffer));
+                REQUIRE(sx126x_get_lora_pkt_status(NULL, &status));
+                REQUIRE(sx126x_read_buffer(NULL, buffer.buffer_start_pointer, received, buffer.pld_len_in_bytes));
+                /* Capture status before restarting RX; never replace it with a bad packet. */
+                if (!packet_params(255) || !enter_receive()) return false;
+                stats.rx_packets++;
+                stats.rx_bytes += buffer.pld_len_in_bytes;
+                stats.last_rssi_dbm = status.rssi_pkt_in_dbm;
+                stats.last_snr_db = status.snr_pkt_in_db;
+                stats.last_rx_valid = true;
+                if (receive_callback) receive_callback(received, buffer.pld_len_in_bytes);
+                return true;
+            }
+        }
     }
     if (!packet_params(255)) return false;
     return enter_receive();
@@ -121,6 +160,7 @@ void radio_poll(void)
     irq_restore(saved);
     if (pending && !handle_irq()) return;
     if (state == RADIO_TRANSMITTING && (uint32_t)(clock_millis() - tx_started) >= RADIO_TX_WATCHDOG_MS) {
+        stats.tx_watchdogs++;
         /* Recover a lost DIO1 edge without inventing a successful delivery. */
         if (sx126x_set_standby(NULL, SX126X_STANDBY_CFG_RC) != SX126X_STATUS_OK) {
             fail("TX watchdog/SPI");
@@ -129,6 +169,8 @@ void radio_poll(void)
         if (packet_params(255)) (void)enter_receive();
     }
 }
+
+void radio_get_stats(radio_stats_t *out) { if (out) *out = stats; }
 
 bool radio_can_send(void) { return state == RADIO_RECEIVING; }
 radio_state_t radio_state(void) { return state; }
