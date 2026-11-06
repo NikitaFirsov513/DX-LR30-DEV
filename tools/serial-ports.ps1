@@ -33,3 +33,23 @@ function Resolve-Pj26Port {
     if ($present[0].InstanceId -match '^BTH') { throw "Port $chosen is Bluetooth, not the PJ26 USB interface." }
     return $chosen.ToUpperInvariant()
 }
+
+function Resolve-Pj26PortPair {
+    param([object[]]$Devices, [string[]]$UsbHardwareIds, [string]$PortA, [string]$PortB)
+    $candidates = @(Get-Pj26PortCandidates -Devices $Devices -UsbHardwareIds $UsbHardwareIds)
+    if ([bool]$PortA -ne [bool]$PortB) { throw 'Specify both -PortA COMx and -PortB COMy, or neither for AUTO.' }
+    if ($PortA -and $PortB) {
+        if ($PortA -eq $PortB) { throw 'A and B must be different COM ports.' }
+        foreach ($portName in @($PortA,$PortB)) {
+            if ($portName -notmatch '^COM[1-9][0-9]*$' -or $candidates.Port -notcontains $portName) {
+                throw "Port $portName is not a connected compatible CH340/CH341 device. Check List boards."
+            }
+        }
+        return @($PortA.ToUpperInvariant(),$PortB.ToUpperInvariant())
+    }
+    if ($candidates.Count -ne 2) {
+        $names = ($candidates | ForEach-Object { $_.Port }) -join ', '
+        throw "AUTO needs exactly two compatible boards; found $($candidates.Count) [$names]. Connect both PJ26 boards, or specify -PortA COMx -PortB COMy."
+    }
+    return @($candidates[0].Port.ToUpperInvariant(),$candidates[1].Port.ToUpperInvariant())
+}

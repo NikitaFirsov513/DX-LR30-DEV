@@ -25,7 +25,7 @@ def main():
     ctest = Path(cmake).with_name('ctest.exe' if os.name == 'nt' else 'ctest')
     run([ctest,'--test-dir',out,'-C','Debug','--output-on-failure'])
     if os.name == 'nt':
-        for test in ['test-flasher.ps1','test-serial-ports.ps1']:
+        for test in ['test-flasher.ps1','test-serial-ports.ps1','test-link-host.ps1']:
             run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',ROOT/'tools'/test])
     print('PASS: firmware builds, linked images, board map, native C tests and host flasher tests. Hardware tests are separate.')
 

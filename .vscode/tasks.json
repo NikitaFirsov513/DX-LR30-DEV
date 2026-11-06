@@ -138,6 +138,98 @@
       "label": "EIDE: flash",
       "command": "${command:eide.project.uploadToDevice}",
       "problemMatcher": []
+    },
+    {
+      "label": "Test radio link",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tools/test-link.ps1"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "detail": "Автоматически выбрать две PJ26 и проверить по 20 пакетов в обе стороны; закрыть HTerm."
+    },
+    {
+      "label": "Test radio link preview",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tools/test-link.ps1",
+        "-Preview"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "detail": "Предпросмотр консоли и отчётов без открытия COM-портов."
+    },
+    {
+      "label": "Test radio link: choose ports",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tools/test-link.ps1",
+        "-PortA",
+        "${input:linkPortA}",
+        "-PortB",
+        "${input:linkPortB}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "detail": "Ввести COM-порты двух PJ26 вручную, затем проверить связь."
+    }
+  ],
+  "inputs": [
+    {
+      "id": "linkPortA",
+      "type": "promptString",
+      "description": "PJ26 board A COM port (see List boards)"
+    },
+    {
+      "id": "linkPortB",
+      "type": "promptString",
+      "description": "PJ26 board B COM port (different from A)"
     }
   ]
 }

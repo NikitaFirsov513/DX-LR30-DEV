@@ -3,6 +3,10 @@
 Read README.md, docs/ARCHITECTURE.md and docs/VALIDATION.md before changing firmware.
 Use the repository containing this file as the project root. Do not modify other copies.
 
+## User workflow
+
+Before starting a new scope of work, describe the concrete changes and wait for the user's confirmation. Continue implementation and checks within the approved scope without repeated questions. The user chooses when to commit, publish or create release/version tags; do not do these automatically. Hardware link tests open two COM ports and send radio traffic: run them only when the user asks to start the test, not while implementing the test tool. Preview and host-model checks do not open COM ports.
+
 ## Hardware and ownership
 
 - MCU: STM32F103C8T6, 64 KiB Flash, 20 KiB SRAM, HSE 8 MHz, core 72 MHz.
