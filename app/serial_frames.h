@@ -12,9 +12,12 @@ typedef struct {
     uint8_t queue[FRAME_QUEUE_BYTES];
     uint16_t pending_size, head, tail, used;
     uint32_t dropped;
+    uint8_t max_payload;
 } serial_frames_t;
 
 void serial_frames_init(serial_frames_t *frames);
+/* Configure before enabling UART interrupts; zero is rejected. */
+bool serial_frames_set_limit(serial_frames_t *frames, uint8_t limit);
 void serial_frames_feed(serial_frames_t *frames, uint8_t byte);
 void serial_frames_flush(serial_frames_t *frames);
 void serial_frames_discard(serial_frames_t *frames);

@@ -12,11 +12,15 @@ $ErrorActionPreference = 'Stop'
 $a = $null; $b = $null; $session = $null; $failure = $null
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $reportBase = $null
+$originalA = $null; $originalB = $null
+$restoreA = $false; $restoreB = $false
 
 function Save-LinkReport {
     param([string]$Base, [object]$Report)
     [Pj26Link.ReportFile]::Save(($Base + '.json'), ($Report | ConvertTo-Json -Depth 8))
 }
+. (Join-Path $PSScriptRoot 'node-control.ps1')
+
 try {
     Write-Host ''
     Write-Host '  LoRa NET / PJ26 — ТЕСТ РАДИОКАНАЛА' -ForegroundColor Cyan
@@ -49,6 +53,27 @@ try {
     [IO.Directory]::CreateDirectory($directory) | Out-Null
     $prefix = if ($Preview) { 'preview' } else { 'link' }
     $reportBase = Join-Path $directory ($prefix + '-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '-' + $PID)
+    if (-not $Preview) {
+        $session.Report.Addressing.Required = $true
+        Write-Host '  Определение ID и проверка адресного протокола...' -ForegroundColor Cyan
+        $startup = [Diagnostics.Stopwatch]::StartNew()
+        while ($startup.ElapsedMilliseconds -lt 1500) {
+            $null = $a.ReadAvailable(); $null = $b.ReadAvailable()
+            Start-Sleep -Milliseconds 10
+        }
+        $originalA = Invoke-Pj26Node -Endpoint $a
+        $originalB = Invoke-Pj26Node -Endpoint $b
+        $session.Report.NodeA = $originalA; $session.Report.NodeB = $originalB
+        if ($originalA.Id -eq $originalB.Id) { throw 'Both boards have the same ID. Use !PJ26 ID with different nonzero IDs, or reset to UID defaults.' }
+        if ($Size -gt $originalA.Mtu -or $Size -gt $originalB.Mtu) { throw ('Addressed firmware MTU is {0}; reduce -Size.' -f [Math]::Min($originalA.Mtu,$originalB.Mtu)) }
+        Write-Host ('  Узел A = {0:X8}   Узел B = {1:X8}   MTU = {2}' -f $originalA.Id,$originalB.Id,$originalA.Mtu)
+        $restoreA = $true
+        Test-Pj26ForeignAddress -Sender $a -Receiver $b -SenderInfo $originalA -ReceiverInfo $originalB -Result $session.Report.Addressing -WaitMs $TimeoutMs
+        Write-Host '  Чужой адрес: пакет получен по радио и отброшен, в UART не передан.' -ForegroundColor Green
+        $null = Invoke-Pj26Node -Endpoint $a -Command ('TO {0:X8}' -f $originalB.Id)
+        $restoreB = $true
+        $null = Invoke-Pj26Node -Endpoint $b -Command ('TO {0:X8}' -f $originalA.Id)
+    }
     Write-Host ('  {0} пакетов в каждую сторону, по {1} байт; тайм-аут {2} мс; пауза {3} мс' -f $Count, $Size, $TimeoutMs, $GapMs)
     Write-Host '  Задержка: ПК -> USB/UART -> радио -> UART/USB -> ПК.' -ForegroundColor DarkGray
     Write-Host '  Ctrl+C — остановить. Тест не прошивает платы.' -ForegroundColor DarkGray
@@ -72,8 +97,22 @@ try {
     } while ($running)
 } catch {
     $failure = $_.Exception.GetBaseException().Message
-    if ($session) { $session.Report.Error = $failure }
+    if ($session) {
+        $session.Report.Error = $failure
+        if ($session.Report.Addressing.Required -and -not $session.Report.Addressing.Passed) { $session.Report.Addressing.Error = $failure }
+    }
 } finally {
+    foreach ($entry in @(@($a,$originalA,$restoreA),@($b,$originalB,$restoreB))) {
+        if ($entry[2] -and $entry[1]) {
+            try { $null = Invoke-Pj26Node -Endpoint $entry[0] -Command ('TO {0:X8}' -f $entry[1].Destination) -Timeout 1500 }
+            catch {
+                $restoreError = 'Could not restore destination; reset both boards to broadcast defaults. ' + $_.Exception.GetBaseException().Message
+                if ($session) { $session.Report.RestoreErrors.Add($restoreError) }
+                if (-not $failure) { $failure = $restoreError }
+                if ($session) { $session.Report.Error = $failure }
+            }
+        }
+    }
     foreach ($endpoint in @($a,$b)) {
         if ($endpoint -is [IDisposable]) {
             try { $endpoint.Dispose() } catch {
@@ -86,7 +125,11 @@ try {
         if (-not $session.Report.Completed -and -not $session.Report.Error) { $session.Report.Error = 'Interrupted before completion.' }
         $session.Report.FinishedUtc = [DateTime]::UtcNow.ToString('o')
         Save-LinkReport -Base $reportBase -Report $session.Report
-        $session.Report.Packets | Select-Object Direction,Sequence,Status,LatencyMs | Export-Csv -LiteralPath ($reportBase + '.csv') -NoTypeInformation -Encoding UTF8
+        if ($session.Report.Packets.Count) {
+            $session.Report.Packets | Select-Object Direction,Sequence,Status,LatencyMs | Export-Csv -LiteralPath ($reportBase + '.csv') -NoTypeInformation -Encoding UTF8
+        } else {
+            [IO.File]::WriteAllText(($reportBase + '.csv'), "Direction,Sequence,Status,LatencyMs`r`n", [Text.UTF8Encoding]::new($true))
+        }
         Write-Host ''
         foreach ($result in $session.Report.Directions) {
             Write-Host ('  {0}: отправлено {1}, получено {2}, потери {3} ({4:0.0}%), опоздали {5}, дубли {6}, эхо {7}, искажения {8}' -f
@@ -94,6 +137,7 @@ try {
             if ($result.Received) { Write-Host ('          задержка мин/сред/макс: {0}/{1:0.0}/{2} мс' -f $result.MinMs,$result.AverageMs,$result.MaxMs) -ForegroundColor DarkGray }
         }
         Write-Host ('  Ошибки тестовых кадров A/B: {0}/{1}; посторонние кадры: {2}' -f $session.Report.BadTestFrames[0],$session.Report.BadTestFrames[1],$session.Report.ForeignFrames)
+        foreach ($warning in $session.Report.RestoreErrors) { Write-Host ('  Восстановление: ' + $warning) -ForegroundColor Yellow }
         Write-Host ('  Отчёты: ' + $reportBase + '.json / .csv') -ForegroundColor Cyan
     }
 }

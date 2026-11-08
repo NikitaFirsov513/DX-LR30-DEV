@@ -1,7 +1,17 @@
 #include "serial_frames.h"
 #include <string.h>
 
-void serial_frames_init(serial_frames_t *frames) { memset(frames, 0, sizeof(*frames)); }
+void serial_frames_init(serial_frames_t *frames)
+{
+    memset(frames, 0, sizeof(*frames));
+    frames->max_payload=FRAME_MAX_BYTES;
+}
+bool serial_frames_set_limit(serial_frames_t *frames, uint8_t limit)
+{
+    if (!limit || frames->pending_size || frames->used) return false;
+    frames->max_payload=limit;
+    return true;
+}
 
 static void put(serial_frames_t *frames, uint8_t byte)
 {
@@ -33,7 +43,7 @@ void serial_frames_flush(serial_frames_t *frames)
 void serial_frames_feed(serial_frames_t *frames, uint8_t byte)
 {
     frames->pending[frames->pending_size++] = byte;
-    if (frames->pending_size == FRAME_MAX_BYTES) serial_frames_flush(frames);
+    if (frames->pending_size == frames->max_payload) serial_frames_flush(frames);
 }
 
 void serial_frames_discard(serial_frames_t *frames)

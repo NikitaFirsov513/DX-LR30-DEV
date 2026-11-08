@@ -142,8 +142,82 @@ namespace Pj26Link {
         public double LossPercent { get { return Sent == 0 ? 0 : 100.0 * Lost / Sent; } }
         public double? AverageMs { get { return Received == 0 ? (double?)null : (double)TotalMs / Received; } }
     }
+    public sealed class NodeStatus {
+        public uint Id, Destination, Boot, NextSequence, Accepted, Foreign, Duplicates;
+        public uint LastSource, LastDestination, LastSequence;
+        public int Mtu, LastKind, Version;
+        public bool RawNext;
+        public static NodeStatus Parse(string line, string request) {
+            if (!line.StartsWith("[node] req=" + request + " ",StringComparison.Ordinal)) return null;
+            var fields=new Dictionary<string,string>();
+            foreach(string token in line.Trim().Split(' ')) {
+                int equals=token.IndexOf('=');
+                if(equals>0)fields[token.Substring(0,equals)]=token.Substring(equals+1);
+            }
+            string status;
+            if(!fields.TryGetValue("status",out status) || status!="OK") throw new InvalidOperationException("Node rejected the local UART command: "+line);
+            try {
+                NodeStatus node=new NodeStatus {
+                    Id=Hex(fields["id"]),Destination=Hex(fields["dst"]),Boot=Hex(fields["boot"]),NextSequence=Hex(fields["next"]),
+                    Mtu=Int32.Parse(fields["mtu"]),Version=Int32.Parse(fields["version"]),
+                    Accepted=UInt32.Parse(fields["rx"]),Foreign=UInt32.Parse(fields["foreign"]),Duplicates=UInt32.Parse(fields["duplicate"]),
+                    LastSource=Hex(fields["last_src"]),LastDestination=Hex(fields["last_dst"]),LastSequence=Hex(fields["last_seq"]),
+                    LastKind=Int32.Parse(fields["last_kind"]),RawNext=fields["raw"]!="0"
+                };
+                if(node.Id==0 || node.Id==UInt32.MaxValue || node.Destination==0 || node.Boot==0 || node.Mtu!=234 || node.Version!=1 || node.RawNext)
+                    throw new FormatException("Unexpected node protocol/MTU/ID or pending RAW input.");
+                return node;
+            } catch(Exception e) { throw new FormatException("Invalid node response: "+line,e); }
+        }
+        static uint Hex(string value) {
+            if(value.Length!=8)throw new FormatException("Expected eight hexadecimal digits.");
+            return UInt32.Parse(value,System.Globalization.NumberStyles.HexNumber,System.Globalization.CultureInfo.InvariantCulture);
+        }
+    }
+    public sealed class NodeRequest {
+        readonly IEndpoint endpoint;
+        readonly int timeout;
+        readonly StringBuilder pending=new StringBuilder();
+        public readonly string Request=Guid.NewGuid().ToString("N").Substring(0,8).ToUpperInvariant();
+        public NodeStatus Response;
+        public NodeRequest(IEndpoint wire, string command, int timeoutMs) {
+            endpoint=wire; timeout=timeoutMs;
+            if(command.IndexOf('\r')>=0 || command.IndexOf('\n')>=0)throw new ArgumentException("Single node command expected.");
+            endpoint.Write(Encoding.ASCII.GetBytes("!PJ26 "+command+" "+Request+"\r\n"));
+        }
+        public bool Step(long elapsedMs) {
+            if(Response!=null)return false;
+            pending.Append(Encoding.ASCII.GetString(endpoint.ReadAvailable()));
+            int end;
+            while((end=pending.ToString().IndexOf('\n'))>=0) {
+                string line=pending.ToString(0,end).TrimEnd('\r'); pending.Remove(0,end+1);
+                NodeStatus parsed=NodeStatus.Parse(line,Request);
+                if(parsed!=null){Response=parsed;return false;}
+            }
+            if(pending.Length>4096)pending.Remove(0,pending.Length-4096);
+            if(elapsedMs>=timeout)throw new TimeoutException("No matching node response. Both boards need the addressed Radio firmware; close terminals and reset if RAW input was armed.");
+            return true;
+        }
+    }
+    public sealed class AddressCheck {
+        public bool Required, Passed, Forwarded;
+        public uint SenderId, ReceiverId, RejectedDestination, Sequence, ForeignBefore, ForeignAfter;
+        public string Error;
+        public void Verify(NodeStatus before, NodeStatus after, uint sender, uint receiver, uint destination, uint sequence, bool forwarded) {
+            Required=true;SenderId=sender;ReceiverId=receiver;RejectedDestination=destination;Sequence=sequence;
+            ForeignBefore=before.Foreign;ForeignAfter=after.Foreign;Forwarded=forwarded;
+            uint delta=unchecked(after.Foreign-before.Foreign);
+            Passed=!forwarded && before.Id==receiver && after.Id==receiver && destination!=0 && destination!=UInt32.MaxValue && destination!=sender && destination!=receiver && delta>0 && after.LastKind==1 && after.LastSource==sender &&
+                   after.LastDestination==destination && after.LastSequence==sequence;
+            if(!Passed)Error="Foreign-address packet was not proven received-and-rejected; no UART output alone is insufficient.";
+        }
+    }
+
     public sealed class Result {
         public string Mode="hardware", PortA, PortB, SessionId, StartedUtc=DateTime.UtcNow.ToString("o"), FinishedUtc, Error;
+        public List<string> RestoreErrors=new List<string>();
+        public NodeStatus NodeA, NodeB;
+        public AddressCheck Addressing=new AddressCheck();
         public bool Completed;
         public Options Options;
         public int ForeignFrames;
@@ -154,6 +228,8 @@ namespace Pj26Link {
         public List<PacketResult> Packets = new List<PacketResult>();
         public bool Passed {
             get {
+                if (RestoreErrors.Count != 0) return false;
+                if (Addressing.Required && !Addressing.Passed) return false;
                 if (!Completed || Error != null || BadTestFrames[0] != 0 || BadTestFrames[1] != 0 || ForeignFrames != 0) return false;
                 foreach (DirectionResult d in Directions)
                     if (d.Sent != Options.Count || d.Lost != 0 || d.Late != 0 || d.Duplicates != 0 || d.Echoes != 0 || d.Mismatches != 0) return false;
