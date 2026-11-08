@@ -60,3 +60,20 @@
 - `test-link.ps1 -Preview -Count 2 -Size 255` — PASS: русская консоль, симуляция обеих сторон, JSON/CSV; повторное обновление checkpoint проверено.
 
 Реальные COM-порты не открывались, radio traffic не запускался. Preview и проверки в памяти не подтверждают задержки/потери на оборудовании. Пользователь запускает задачу Test radio link отдельно, когда обе платы подключены и порты свободны.
+
+## Адресные пакеты PN/v1, 8 ноября 2026
+
+Ветка `codex/addressing`, исходный commit `074e485` (`add module image`). Один Radio HEX с UID-производным ID, PN/v1 header 21 байт/MTU 234, RAM-only команды, broadcast/unicast/фильтрация и ограниченный кэш дублей. ACK/автоматических повторов нет; параметры радио, pin map и vendor не менялись.
+
+- `python tools/test.py` — PASS после окончательных C-изменений: обе ARM-сборки, память/HEX/BIN/IRQ/vendor/пины, четыре нативных C-теста и модели Windows ISP/COM/link test.
+- `test_network` — PASS: независимый wire-vector, MTU/повреждённые заголовки/версии/типы/адреса, бинарные payload, A↔B unicast, broadcast, foreign/self/duplicate, session/TTL/вытеснение/переполнения, локальные INFO/TO/ID/RAW, ограниченный вывод, UART 255→234+21.
+- `test-link-host.ps1` после обновления PC-части — PASS: INFO correlation/version/fragmentation/timeout, доказательство foreign rejection по счётчику и точным метаданным. Дополнительно выполнены настоящие PowerShell-функции INFO/probe/восстановления на моделях: пропажа RF-пакета и неправильная выдача чужого payload не дают ложного PASS.
+- Нативный EIDE `unify_builder`: Radio/UART — PASS. `verify.py --build-dir build/eide` — PASS. BIN обоих targets CMake/EIDE побайтно совпали. Обновлены только игнорируемые списки builder.params, общий EIDE manifest не регенерировался.
+- Radio: 16 056 байт Flash, 6 904 байта RAM с резервами heap/stack. UART: 7 132 / 5 320 байт; UART-only остаётся echo без адресных команд.
+
+| Target | SHA256 BIN | SHA256 HEX CMake |
+|---|---|---|
+| Radio | `24c77b99cc1ab9860cf296a068bc3d19237b079d512fe9514df5275adcd111d8` | `d5bd892b7fdcbaf5fc2f35c60781707261ae637e9c0842fe93299cd7b0921732` |
+| UART | `38f78872be7dd1e9f038b466c4511c19faaacb14cbc84aa81d3de8c21eb2651e` | `44d0b24b30c9a7667c82b3332a5b2542dc5a90e5c0e2d8754f9e1e4bfb541d61` |
+
+COM-порты не открывались, MCU не прошивались, реальные RF-передачи не запускались. Аппаратное подтверждение прежней версии не переносится автоматически на PN/v1: обновить обе платы и отдельно выполнить ADDRESSED_PROTOCOL.md / Test radio link. Теги/коммиты/публикация остаются решением пользователя.
